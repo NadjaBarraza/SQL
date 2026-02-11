@@ -1,3 +1,13 @@
+-- ============================================
+-- Superstore SQL Analysis Project
+-- ============================================
+-- This project analyzes a retail Superstore dataset
+-- using SQL to explore pricing trends, category-level
+-- statistics, and inventory insights.
+-- ============================================
+
+
+-- Create Superstore Table
 CREATE TABLE superstore (
     item_id INTEGER PRIMARY KEY,
     item_name TEXT,
@@ -7,6 +17,7 @@ CREATE TABLE superstore (
     average_rating DECIMAL(3, 2)
 );
 
+-- Insert Sample Data into Superstore Table
 INSERT INTO superstore (item_id, item_name, category, price, stock_quantity, average_rating)
 VALUES
     (1, 'Stainless Steel Cookware Set', 'Kitchen Supplies', 89.99, 50, 4.6),
@@ -24,28 +35,47 @@ VALUES
     (13, 'Slow Cooker', 'Appliances', 49.95, 30, 4.7),
     (14, 'Cutlery Set', 'Kitchen Supplies', 34.50, 40, 4.4),
     (15, 'Cozy Throw Blanket', 'Furnishings', 24.99, 100, 4.2);
-    
 
--- Order items by price
-SELECT *
+
+-- ============================================
+-- 1. Order Items by Price (Highest to Lowest)
+-- ============================================
+-- This query helps identify premium vs. low-cost products.
+SELECT item_name, price
 FROM superstore
-ORDER BY price;
+ORDER BY price DESC;
 
--- Grab average item prices
-SELECT AVG(price)
+
+-- ============================================
+-- 2. Overall Average Item Price
+-- ============================================
+-- Calculates the average price across all store items.
+SELECT AVG(price) AS avg_price
 FROM superstore;
 
--- Grab average kitchen supplies price
+
+-- ============================================
+-- 3. Average Price for Kitchen Supplies
+-- ============================================
+-- Filters by category to analyze a specific product segment.
 SELECT AVG(price) AS avg_kitchen_price
 FROM superstore
 WHERE category = 'Kitchen Supplies';
 
--- How many low stock items are there?
+
+-- ============================================
+-- 4. Identify Low-Stock Items (Inventory Risk)
+-- ============================================
+-- Counts how many items have fewer than 30 units in stock.
 SELECT COUNT(*) AS low_stock_items
 FROM superstore
 WHERE stock_quantity < 30;
 
--- What are the low stock item names?
+
+-- ============================================
+-- 5. List Low-Stock Products
+-- ============================================
+-- Shows which specific products may need restocking.
 SELECT item_name, stock_quantity
 FROM superstore
 WHERE stock_quantity < 30
