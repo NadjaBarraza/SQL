@@ -1,5 +1,15 @@
 # In this project, I used SQL to analyze customer and sales data across multiple tables in order to answer business questions about orders, products, revenue, and customer purchasing behavior.
 
+# Customer & Order Data Analysis
+# SQLite / BIT_DB Dataset
+
+# This project explores customer orders, product sales, and revenue trends
+# using SQL queries across multiple sales tables.
+
+----------------------------------------------------
+# PART 1 — Basic Customer & Order Analytics
+----------------------------------------------------
+
 # Initial data check: review customer records with valid order IDs.
 SELECT *
 FROM BIT_DB.customers
@@ -63,4 +73,95 @@ LEFT JOIN BIT_DB.customers cust
 WHERE Feb.Quantity > 2
   AND LENGTH(orderid) = 6
   AND orderid <> 'Order ID'
+;
+
+
+----------------------------------------------------
+# PART 2 — Data Exploration & Filtering Practice
+----------------------------------------------------
+
+# Practice queries exploring filtering, pattern matching, and date conditions.
+
+# Products priced starting with $5
+SELECT DISTINCT Product, Price
+FROM BIT_DB.FebSales
+WHERE Price LIKE '5%';
+
+# Products priced ending in .99
+SELECT DISTINCT Product, Price
+FROM BIT_DB.FebSales
+WHERE Price LIKE '%.99';
+
+# Products containing batteries
+SELECT DISTINCT Product
+FROM BIT_DB.FebSales
+WHERE Product LIKE '%Batteries%';
+
+# Orders placed at a specific timestamp
+SELECT location
+FROM BIT_DB.FebSales
+WHERE orderdate = '02/18/19 01:35';
+
+# Total products sold on February 18th
+SELECT SUM(quantity)
+FROM BIT_DB.FebSales
+WHERE orderdate LIKE '02/18/19%';
+
+# Orders between two dates
+SELECT orderdate
+FROM BIT_DB.FebSales
+WHERE orderdate BETWEEN '02/13/19 00:00'
+AND '02/18/19 00:00';
+
+----------------------------------------------------
+# PART 3 — Advanced Customer & Order Analytics
+----------------------------------------------------
+
+# 8. How many of each type of headphone were sold in February?
+SELECT Product,
+       SUM(Quantity) AS total_quantity_sold
+FROM BIT_DB.FebSales
+WHERE Product LIKE '%Headphones%'
+  AND LENGTH(orderid) = 6
+  AND orderid <> 'Order ID'
+GROUP BY Product
+;
+
+# 9. What was the average amount spent per account in February?
+SELECT SUM(quantity * price) / COUNT(cust.acctnum) AS avg_amount_spent_per_account
+FROM BIT_DB.FebSales Feb
+LEFT JOIN BIT_DB.customers cust
+    ON Feb.orderid = cust.order_id
+WHERE LENGTH(orderid) = 6
+  AND orderid <> 'Order ID'
+;
+
+# 10. Find order IDs from Georgia (GA) where the order has an average price greater than $1,000 and the order date begins with '04/1'.
+SELECT orderID
+FROM BIT_DB.AprSales
+WHERE orderdate LIKE '04/1%'
+  AND location LIKE '%GA%'
+  AND LENGTH(orderid) = 6
+  AND orderid <> 'Order ID'
+GROUP BY orderID
+HAVING AVG(price) > 1000
+;
+
+# 11. Reverse engineer the query that returns the specified MaySales results.
+SELECT location,
+       orderID
+FROM BIT_DB.MaySales
+WHERE orderID LIKE '1943_5'
+  AND LENGTH(orderid) = 6
+  AND orderid <> 'Order ID'
+ORDER BY orderID
+;
+
+# 12. Which product brought in the most revenue in January, and how much revenue did it bring in total?
+SELECT product,
+       SUM(quantity * price) AS revenue
+FROM BIT_DB.JanSales
+GROUP BY product
+ORDER BY revenue DESC
+LIMIT 1
 ;
