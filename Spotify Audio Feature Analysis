@@ -1,0 +1,122 @@
+-- =====================================================
+-- Spotify Data Analysis Project
+-- Dataset: Spotify Top Tracks
+-- Tools: SQL (SQLite)
+--
+-- This project explores relationships between audio
+-- features such as danceability, energy, acousticness,
+-- and popularity using SQL queries.
+--
+-- Techniques used:
+-- GROUP BY, HAVING, CASE statements, subqueries,
+-- correlated subqueries, and aggregation functions.
+-- =====================================================
+
+
+-- What is the average danceability and average energy for each artist?
+
+SELECT 
+    artist_name,
+    ROUND(AVG(danceability), 2) AS avg_danceability,
+    ROUND(AVG(energy), 2) AS avg_energy
+FROM Spotifydata
+GROUP BY artist_name
+ORDER BY avg_danceability DESC;
+
+-- Which artists have an average popularity greater than 90?
+
+SELECT 
+artist_name, 
+ROUND(AVG(popularity),2) AS avg_popularity, 
+COUNT(*) AS song_count
+FROM Spotifydata
+GROUP BY artist_name
+HAVING AVG(popularity) > 90
+ORDER BY avg_popularity DESC;
+
+-- How does average popularity compare across short, medium, and long songs?
+
+SELECT
+    CASE
+        WHEN duration_ms < 180000 THEN 'Short Duration'
+        WHEN duration_ms BETWEEN 180000 AND 240000 THEN 'Medium Duration'
+        ELSE 'Long Duration'
+    END AS song_length,
+    COUNT(*) AS song_count,
+    ROUND(AVG(popularity), 2) AS avg_popularity
+FROM Spotifydata
+GROUP BY song_length
+ORDER BY avg_popularity DESC;
+
+-- What is the average danceability of the 10 most popular songs?
+
+SELECT ROUND(AVG(danceability),2) AS avg_danceability
+FROM (
+    SELECT danceability
+    FROM Spotifydata
+    ORDER BY popularity DESC
+    LIMIT 10
+);
+
+-- Which artists have more than one song in the dataset?
+
+SELECT
+    artist_name,
+    COUNT(*) AS song_count
+FROM Spotifydata
+GROUP BY artist_name
+HAVING COUNT(*) > 1
+ORDER BY song_count DESC;
+
+-- Which songs have above-average energy?
+
+SELECT
+    artist_name,
+    track_name,
+    popularity,
+    energy
+FROM Spotifydata
+WHERE energy > (SELECT AVG(energy) FROM Spotifydata)
+ORDER BY popularity DESC;
+
+-- Which artists have songs with both above-average danceability and above-average energy?
+
+SELECT
+    artist_name,
+    track_name,
+    ROUND(danceability, 2) AS danceability,
+    ROUND(energy, 2) AS energy,
+    popularity
+FROM Spotifydata
+WHERE energy > (SELECT AVG(energy) FROM Spotifydata)
+AND danceability > (SELECT AVG(danceability) FROM Spotifydata)
+ORDER BY popularity DESC;
+
+-- How does average popularity compare across low-, medium-, and high-acousticness songs?
+
+SELECT
+    CASE
+        WHEN acousticness < 0.2 THEN 'Low Acousticness'
+        WHEN acousticness BETWEEN 0.2 AND 0.6 THEN 'Medium Acousticness'
+        ELSE 'High Acousticness'
+    END AS acousticness_category,
+    COUNT(*) AS song_count,
+    ROUND(AVG(popularity), 2) AS avg_popularity
+FROM Spotifydata
+GROUP BY acousticness_category
+ORDER BY avg_popularity DESC;
+
+-- Most popular song for each artist
+
+SELECT
+    artist_name,
+    track_name,
+    popularity
+FROM Spotifydata s1
+WHERE popularity =
+(
+    SELECT MAX(popularity)
+    FROM Spotifydata s2
+    WHERE s1.artist_name = s2.artist_name
+)
+ORDER BY popularity DESC;
